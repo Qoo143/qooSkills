@@ -1,5 +1,5 @@
 ---
-name: database
+name: adl_database
 description: >
   資料庫結構參考。當詢問資料表、欄位、schema、
   CREATE TABLE、資料模型、FK、關聯 相關問題時觸發。
