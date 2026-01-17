@@ -2,11 +2,6 @@
 
 自主學習行事曆，儲存學生的學習行程與任務排程。
 
-## 關聯
-
-- `user_id` → `user_info.user_id` (CASCADE)
-- `mission_sn` → `mission_info.mission_sn`
-
 ## CREATE TABLE
 
 ```sql

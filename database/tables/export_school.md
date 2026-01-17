@@ -2,15 +2,6 @@
 
 轉出入登記表，記錄學生跨校轉出轉入的歷程資料。
 
-## 關聯
-
-- `org_id` → `user_info.user_id` (SET NULL)
-- `new_id` → `user_info.user_id` (SET NULL)
-- `org_school` → `organization.organization_id`
-- `new_school` → `organization.organization_id`
-- `exporter` → `user_info.user_id` (SET NULL)
-- `user_level` → `user_access.access_level`
-
 ## CREATE TABLE
 
 ```sql

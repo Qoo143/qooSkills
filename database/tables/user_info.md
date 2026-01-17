@@ -2,12 +2,6 @@
 
 使用者基本資料表，儲存所有使用者帳號與個人資訊。
 
-## 關聯
-
-- `class_sn` → `school_class_info.class_sn`
-- `organization_id` → `organization.organization_id`
-- `update_id` → `user_info.user_id` (自關聯)
-
 ## CREATE TABLE
 
 ```sql

@@ -2,12 +2,6 @@
 
 補救教學學生表，記錄參與補救教學班級的學生名單。
 
-## 關聯
-
-- `class_sn` → `remedial_class.class_sn`
-- `student_id` → `user_info.user_id` (CASCADE)
-- `new_class_agree` → `new_class.new_class_sn`
-
 ## CREATE TABLE
 
 ```sql

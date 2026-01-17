@@ -2,11 +2,6 @@
 
 任務類型表，定義系統中的各種任務類型。
 
-## 關聯
-
-被參照：
-- `mission_info.mission_type` → `mission_type.mission_type_id`
-
 ## CREATE TABLE
 
 ```sql

@@ -2,11 +2,6 @@
 
 學生學期資料表，記錄每學期學生的學校、年級、班級資訊。
 
-## 關聯
-
-- `organization_id` → `organization.organization_id`
-- `stud_id` → `user_info.user_id` (CASCADE)
-
 ## CREATE TABLE
 
 ```sql

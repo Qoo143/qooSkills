@@ -2,14 +2,6 @@
 
 任務資訊表，儲存教師指派或學生自派的學習任務設定。
 
-## 關聯
-
-- `teacher_id` → `user_info.user_id` (SET NULL)
-- `subject_id` → `subject.subject_id`
-- `mission_type` → `mission_type.mission_type_id`
-- `copy_record` → `mission_info.mission_sn` (自關聯)
-- `mid` → `publisher_mapping.mapping_sn` (SET NULL)
-
 ## CREATE TABLE
 
 ```sql

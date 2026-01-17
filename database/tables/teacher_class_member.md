@@ -2,11 +2,6 @@
 
 教師班級成員表，記錄教師自訂班級的學生名單。
 
-## 關聯
-
-- `class_sn` → `teacher_class.teacher_class_sn`
-- `student_id` → `user_info.user_id` (CASCADE)
-
 ## CREATE TABLE
 
 ```sql

@@ -15,6 +15,7 @@ description: >
 
 | 資料表 | 說明 | 檔案 |
 |:-------|:-----|:-----|
+| api_client_config | API 客戶端設定 | [tables/api_client_config.md](./tables/api_client_config.md) |
 | api_token_data | API Token 資料 | [tables/api_token_data.md](./tables/api_token_data.md) |
 | eduexam_paper | 大考考古題試題卷 | [tables/eduexam_paper.md](./tables/eduexam_paper.md) |
 | eduexam_record | 大考考古題測驗紀錄 | [tables/eduexam_record.md](./tables/eduexam_record.md) |
@@ -33,17 +34,21 @@ description: >
 | user_info | 使用者基本資料 | [tables/user_info.md](./tables/user_info.md) |
 | user_status | 使用者狀態 | [tables/user_status.md](./tables/user_status.md) |
 
-## 命名慣例
+## 檔案結構
 
-- 資料表：snake_case
-- 主鍵：`sn` 或 `{table}_sn`
-- 外鍵：`{referenced_table}_sn`
+每個 `tables/*.md` 檔案格式如下：
 
-## 常見欄位說明
+```markdown
+# {table_name}
 
-| 欄位模式 | 說明 |
-|:---------|:-----|
-| `*_sn` | 序號（流水號），通常為主鍵 |
-| `*_time` | 時間戳記 |
-| `*_id` | 識別碼（非流水號） |
-| `org_id` | 學校 ID |
+{一行說明}
+
+## CREATE TABLE
+
+```sql
+CREATE TABLE ...
+```
+```
+
+從 CREATE TABLE 可解析：欄位定義、PRIMARY KEY、INDEX、FOREIGN KEY。
+

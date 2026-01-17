@@ -2,14 +2,6 @@
 
 互動式素養題測驗結果表，記錄學生互動式素養題的作答結果與 AI 評分。
 
-## 關聯
-
-- `user_id` → `user_info.user_id` (CASCADE)
-- `mission_sn` → `mission_info.mission_sn`
-- `map_sn` → `map_info.map_sn`
-- `item_li_sn` → `concept_itemBank_literacy_interactive.item_li_sn`
-- `subject_id` → `subject.subject_id`
-
 ## CREATE TABLE
 
 ```sql

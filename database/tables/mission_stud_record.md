@@ -2,11 +2,6 @@
 
 學生任務狀態表，記錄學生對每個任務的完成進度與狀態。
 
-## 關聯
-
-- `mission_sn` → `mission_info.mission_sn`
-- `user_id` → `user_info.user_id` (CASCADE)
-
 ## CREATE TABLE
 
 ```sql

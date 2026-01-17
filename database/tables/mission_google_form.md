@@ -2,13 +2,6 @@
 
 Google 表單問卷回應表，儲存學生填寫問卷的回應資料。
 
-## 關聯
-
-- `form_type` → `mission_google_master.sn`
-- `user_id` → `user_info.user_id` (SET NULL)
-- `mission_sn` → `mission_info.mission_sn`
-- `org_id` → `organization.organization_id`
-
 ## CREATE TABLE
 
 ```sql

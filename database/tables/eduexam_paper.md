@@ -2,15 +2,6 @@
 
 教育部大考考古題試題卷表，儲存大考考古題的試卷資訊。
 
-## 關聯
-
-- `updater` → `user_info.user_id` (SET NULL)
-- `map_sn` → `map_info.map_sn`
-- `exam_type` → `exam_type.exam_type`
-
-被參照：
-- `eduexam_record.paper_sn` → `eduexam_paper.paper_sn`
-
 ## CREATE TABLE
 
 ```sql

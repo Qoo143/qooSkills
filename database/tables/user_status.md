@@ -2,11 +2,6 @@
 
 使用者狀態表，記錄使用者的登入狀態、活動時間、權限等級及 email 驗證資訊。
 
-## 關聯
-
-- `user_id` → `user_info.user_id` (CASCADE)
-- `access_level` → `user_access.access_level`
-
 ## CREATE TABLE
 
 ```sql

@@ -2,11 +2,6 @@
 
 縱貫測驗結果表，記錄學生縱貫式測驗的作答結果與分析資料。
 
-## 關聯
-
-- `user_id` → `user_info.user_id` (CASCADE)
-- `result_sn` → `mission_info.mission_sn`
-
 ## CREATE TABLE
 
 ```sql

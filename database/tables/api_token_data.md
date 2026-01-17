@@ -2,12 +2,6 @@
 
 API Token 資料表，儲存 API 存取 Token 資訊。
 
-## 關聯
-
-- `api_client_sn` → `api_client_config.api_client_sn`
-- `user_id` → `user_info.user_id`
-- `mission_sn` → `mission_info.mission_sn`
-
 ## CREATE TABLE
 
 ```sql

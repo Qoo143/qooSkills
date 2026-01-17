@@ -2,12 +2,6 @@
 
 教育部大考考古題測驗紀錄表，記錄學生大考考古題的作答紀錄。
 
-## 關聯
-
-- `user_id` → `user_info.user_id` (SET NULL)
-- `mission_sn` → `mission_info.mission_sn`
-- `paper_sn` → `eduexam_paper.paper_sn`
-
 ## CREATE TABLE
 
 ```sql

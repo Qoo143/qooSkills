@@ -2,13 +2,6 @@
 
 單元測驗結果表，記錄學生單元式測驗的作答結果與分析資料。
 
-## 關聯
-
-- `user_id` → `user_info.user_id` (CASCADE)
-- `mission_sn` → `mission_info.mission_sn`
-- `paper_sn` → `concept_paper.paper_sn`
-- `map_sn` → `map_info.map_sn`
-
 ## CREATE TABLE
 
 ```sql
