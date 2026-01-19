@@ -536,6 +536,12 @@ if (in_array($level, USER_TEACHER_GROUP)) {
 
 ---
 
+## API 測試集合
+
+cURL 測試案例（對應 Postman Collection），請參考：[tests/README.md](./tests/README.md)
+
+---
+
 ## 功能對照表 (API Mapping Reference)
 
 舊程式與 v3 API 的功能對照文件存放於 `api-mapping-reference/` 目錄：
