@@ -33,6 +33,7 @@ description: >
 | teacher_class_member | 教師班級成員 | [tables/teacher_class_member.md](./tables/teacher_class_member.md) |
 | user_info | 使用者基本資料 | [tables/user_info.md](./tables/user_info.md) |
 | user_status | 使用者狀態 | [tables/user_status.md](./tables/user_status.md) |
+| WebInfo | 網站資訊內容 | [tables/WebInfo.md](./tables/WebInfo.md) |
 
 ## 檔案結構
 
