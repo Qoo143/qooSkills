@@ -31,8 +31,10 @@ description: >
 | seme_student | 學生學期資料 | [tables/seme_student.md](./tables/seme_student.md) |
 | srl_calendar | 自主學習行事曆 | [tables/srl_calendar.md](./tables/srl_calendar.md) |
 | teacher_class_member | 教師班級成員 | [tables/teacher_class_member.md](./tables/teacher_class_member.md) |
+| user_family | 學生家長名單 | [tables/user_family.md](./tables/user_family.md) |
 | user_info | 使用者基本資料 | [tables/user_info.md](./tables/user_info.md) |
 | user_status | 使用者狀態 | [tables/user_status.md](./tables/user_status.md) |
+| user_third_party | 第三方帳號紀錄 | [tables/user_third_party.md](./tables/user_third_party.md) |
 | WebInfo | 網站資訊內容 | [tables/WebInfo.md](./tables/WebInfo.md) |
 
 ## 檔案結構

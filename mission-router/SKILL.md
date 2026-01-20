@@ -18,7 +18,8 @@ description: >
 
 | 分流名稱 | 適用情境 | Skill 路徑 |
 |----------|----------|------------|
-| **add-content** | 新增連結、文字、圖片等內容維護 | `.agent/SKILLS/mission-router-add-content/SKILL.md` |
+| **add-content** | 新增連結、文字、圖片等內容維護 | `.agent/skills/mission-router-add-content/SKILL.md` |
+| **bug-fix** | 錯誤修復、異常排查、功能故障 | `.agent/skills/mission-router-bug-fix/SKILL.md` |
 
 ---
 

@@ -1170,6 +1170,13 @@
                                 rel="noreferrer noopenner"
                                 title="在新視窗打開鏈結">科宇宙悠遊學
                             </a>
+                            <a
+                                href="https://youtu.be/SMEKB63O190?si=3ueeBlnmzLuKBqNL"
+                                class="list-group-item"
+                                target="_blank"
+                                rel="noreferrer noopenner"
+                                title="在新視窗打開鏈結">臺史博
+                            </a>
                         </div>
                     </div>
                     <div class="col-xl-3 col-lg-6 col-md-6 little-cardTop">
