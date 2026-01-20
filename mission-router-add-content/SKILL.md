@@ -43,7 +43,7 @@ description: >
 
 | 日期 | 任務 | 狀態 | 記錄檔 |
 |------|------|------|--------|
-| 2026-01-20 | 資源服務新增臺史博影片連結 | 待執行 | [tasks/2026-01-20_add-nmth-video.md](./tasks/2026-01-20_add-nmth-video.md) |
+| 2026-01-20 | 資源服務新增臺史博影片連結 | ✅ 已完成 | [tasks/2026-01-20_add-nmth-video.md](./tasks/2026-01-20_add-nmth-video.md) |
 
 ---
 
