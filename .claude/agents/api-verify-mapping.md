@@ -33,13 +33,13 @@ model: sonnet
 $student_id = $_POST['student_id'] ?? $userId;
 $status = $_POST['status'] ?? 'all';
 $page = intval($_POST['page'] ?? 1);
-$keyword = $_POST['keyword'] ?? '';          // ⚠️ 對照表可能遺漏
-$group_id = $_POST['group_id'] ?? null;      // ⚠️ 對照表可能遺漏
+$keyword = $_POST['keyword'] ?? '';          // 注意： 對照表可能遺漏
+$group_id = $_POST['group_id'] ?? null;      // 注意： 對照表可能遺漏
 ```
 
 **對照表檢查**：
 ```markdown
-| list() | ... | ⏳ 待處理 |
+| list() | ... | 待處理 |
 
 ### 參數：
 - student_id (required)
@@ -48,8 +48,8 @@ $group_id = $_POST['group_id'] ?? null;      // ⚠️ 對照表可能遺漏
 ```
 
 **問題發現**：
-- ❌ 對照表遺漏 `keyword` 參數
-- ❌ 對照表遺漏 `group_id` 參數
+- [問題] 對照表遺漏 `keyword` 參數
+- [問題] 對照表遺漏 `group_id` 參數
 
 **修正建議**：
 更新對照表，補充遺漏的參數。
@@ -73,7 +73,7 @@ if (!empty($keyword)) {
     $sql .= " AND m.mission_name LIKE :keyword";
 }
 
-// ⚠️ 小組長特殊權限
+// 注意： 小組長特殊權限
 if ($is_group_leader) {
     $sql .= " AND m.group_id = :groupId";
 }
@@ -89,21 +89,21 @@ public function list()
     $params = $this->validate([
         'status' => 'in:all,ongoing,expired|default:all',
         'page' => 'integer|min:1|default:1',
-        // ❌ 遺漏 keyword 參數
-        // ❌ 遺漏 group_id 參數
+        // [問題] 遺漏 keyword 參數
+        // [問題] 遺漏 group_id 參數
     ]);
 
     $userId = $this->request->getUserId();
     $result = $this->todoService->getList($userId, $params);
-    // ❌ Service 可能沒有處理小組長邏輯
+    // [問題] Service 可能沒有處理小組長邏輯
 }
 ```
 
 **問題發現**：
-1. ❌ Controller 參數驗證不完整
-2. ❌ Service 可能缺少 keyword 搜尋邏輯
-3. ❌ Service 可能缺少小組長特殊權限邏輯
-4. ❌ DAO 的 SQL JOIN 可能不完整
+1. [問題] Controller 參數驗證不完整
+2. [問題] Service 可能缺少 keyword 搜尋邏輯
+3. [問題] Service 可能缺少小組長特殊權限邏輯
+4. [問題] DAO 的 SQL JOIN 可能不完整
 
 **修正建議**：
 1. Controller 補充 `keyword` 和 `group_id` 參數驗證
@@ -117,10 +117,10 @@ public function list()
 // 舊檔案
 $access_level = getUserAccessLevel($userId);
 
-// ⚠️ 特殊邏輯：小組長可以看全組的任務
+// 注意： 特殊邏輯：小組長可以看全組的任務
 $is_group_leader = checkGroupLeader($userId);
 
-// ⚠️ 特殊邏輯：教師可以看所有學生的任務
+// 注意： 特殊邏輯：教師可以看所有學生的任務
 if (in_array($access_level, [21, 25])) {
     // 教師權限
     $sql = "SELECT * FROM mission_info WHERE teacher_id = :teacherId";
@@ -131,13 +131,13 @@ if (in_array($access_level, [21, 25])) {
 ```php
 // TodoController::list()
 $this->guard(['method' => 'POST', 'token' => true]);
-// ❌ 只檢查 token，沒有檢查身份
-// ❌ 沒有處理小組長和教師的特殊邏輯
+// [問題] 只檢查 token，沒有檢查身份
+// [問題] 沒有處理小組長和教師的特殊邏輯
 ```
 
 **問題發現**：
-- ❌ 缺少小組長權限邏輯
-- ❌ 缺少教師權限邏輯
+- [問題] 缺少小組長權限邏輯
+- [問題] 缺少教師權限邏輯
 
 **修正建議**：
 1. Controller 使用 `$this->getAccessLevel()` 取得身份
@@ -154,8 +154,8 @@ return json_encode([
         'missions' => $missions,
         'total' => $total,
         'page' => $page,
-        'teacher_name' => $teacherName,      // ⚠️ 額外欄位
-        'class_info' => $classInfo,          // ⚠️ 額外欄位
+        'teacher_name' => $teacherName,      // 注意： 額外欄位
+        'class_info' => $classInfo,          // 注意： 額外欄位
     ]
 ]);
 ```
@@ -169,13 +169,13 @@ $this->success([
         'page' => $page,
         'total' => $total
     ]
-    // ❌ 遺漏 teacher_name
-    // ❌ 遺漏 class_info
+    // [問題] 遺漏 teacher_name
+    // [問題] 遺漏 class_info
 ]);
 ```
 
 **問題發現**：
-- ❌ 新 API 遺漏舊 API 的欄位
+- [問題] 新 API 遺漏舊 API 的欄位
 
 **修正建議**：
 補充 `teacher_name` 和 `class_info` 欄位，或確認前端是否需要。
@@ -193,7 +193,7 @@ $this->success([
 
 ---
 
-## 🔴 CRITICAL（必須修正）
+## CRITICAL（必須修正）
 
 ### 1. 對照表遺漏重要邏輯
 
@@ -213,7 +213,7 @@ $this->success([
 
 ---
 
-## 🟡 WARNING（應該修正）
+## WARNING（應該修正）
 
 ### 1. Controller 參數不完整
 
@@ -247,7 +247,7 @@ $this->success([
 
 ---
 
-## 🔵 SUGGESTION（建議改進）
+## SUGGESTION（建議改進）
 
 ### 1. 對照表補充 SQL 詳情
 
@@ -261,7 +261,7 @@ $this->success([
 
 ---
 
-## 📋 對照表更新建議
+## 對照表更新建議
 
 更新對照表 `api-mapping-modules_student.md`：
 
@@ -307,7 +307,7 @@ LIMIT :offset, :pageSize
 
 ---
 
-## ✅ 驗證通過項目
+## 驗證通過項目
 
 - [x] 對照表已建立
 - [x] 基本參數已記錄

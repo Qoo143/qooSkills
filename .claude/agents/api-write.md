@@ -11,6 +11,33 @@ model: sonnet
 
 ## 執行流程
 
+### 0. 前置檢查
+
+在開始撰寫 API 前，**必須先讀取專案設定檔**：
+
+```
+include/config.php
+```
+
+此設定檔包含：
+- 資料庫連線設定
+- 使用者身分常數（如 `USER_STUDENT_GROUP`、`USER_TEACHER_GROUP`）
+- 系統全域變數與參數
+
+> [!IMPORTANT]
+> **權限繼承規則**：若舊程式有權限限制（如身分驗證、角色檢查），新 API **必須加上對應的驗證機制**。
+
+分析舊程式時，注意以下權限檢查模式：
+
+| 舊程式權限檢查 | 新 API 對應處理 |
+|---------------|-----------------|
+| `access_level` 判斷 | 使用 `UserHelper::guardStudent()` 或 `guardTeacher()` |
+| Session 身分驗證 | Controller 中設定 `'token' => true` |
+| 角色限定功能 | 在 Controller 層加入權限驗證 |
+| 資料歸屬檢查（如 `user_id`） | Service 層驗證資料所有權 |
+
+確認理解設定與權限需求後，再進行以下步驟。
+
 ### 1. 確認開發項目
 
 詢問用戶：
@@ -36,29 +63,29 @@ model: sonnet
 **位置**：`ADLAPI/v3/App/Dao/XxxDao.php`
 
 **開發規範**：
-- ✅ 使用 PDO Prepared Statements
-- ✅ 讀取使用 `$this->dbSlave`
-- ✅ 寫入使用 `$this->db`
-- ✅ 參數使用 bindValue() 綁定類型
-- ❌ 不包含業務邏輯
-- ❌ 不處理異常（讓 PDOException 冒泡）
+- 必須：繼承 `BaseDao` 類別
+- 必須：使用 PDO Prepared Statements
+- 必須：讀取使用 `$this->dbSlave`
+- 必須：寫入使用 `$this->db`
+- 必須：參數使用 bindValue() 綁定類型
+- 禁止：自行定義 `__construct()` 初始化資料庫連線（由 BaseDao 處理）
+- 禁止：包含業務邏輯
+- 禁止：處理異常（讓 PDOException 冒泡）
+
+**BaseDao 提供**：
+- `$this->db`：主資料庫連線（寫入用）
+- `$this->dbSlave`：從資料庫連線（讀取用）
 
 **程式碼範本**：
 ```php
 <?php
 namespace App\Dao;
 
-class XxxDao
+/**
+ * Xxx 資料存取層
+ */
+class XxxDao extends BaseDao
 {
-    private $db;
-    private $dbSlave;
-
-    public function __construct()
-    {
-        global $dbh, $dbh_slave;
-        $this->db = $dbh;
-        $this->dbSlave = $dbh_slave;
-    }
 
     /**
      * 取得清單
@@ -158,12 +185,12 @@ class XxxDao
 **位置**：`ADLAPI/v3/App/Service/XxxService.php`
 
 **開發規範**：
-- ✅ 包含所有業務邏輯和驗證
-- ✅ Update/Delete 使用 **Read-before-Write** 模式
-- ✅ 使用 `AppException` 處理業務錯誤
-- ✅ 可使用 Helper 進行資料轉換
-- ❌ 不使用 try-catch 捕捉 PDOException
-- ❌ 不處理 HTTP 請求
+- 必須：包含所有業務邏輯和驗證
+- 必須：Update/Delete 使用 **Read-before-Write** 模式
+- 必須：使用 `AppException` 處理業務錯誤
+- 可選：使用 Helper 進行資料轉換
+- 禁止：使用 try-catch 捕捉 PDOException
+- 禁止：處理 HTTP 請求
 
 **程式碼範本**：
 ```php
@@ -285,11 +312,11 @@ class XxxService
 **位置**：`ADLAPI/v3/App/Controller/XxxController.php`
 
 **開發規範**：
-- ✅ 繼承 `BaseController`
-- ✅ 使用 `guard()` 驗證 HTTP 方法和 Token
-- ✅ 使用 `validate()` 驗證參數
-- ✅ 使用 `success()` 回傳結果
-- ❌ 不包含業務邏輯
+- 必須：繼承 `BaseController`
+- 必須：使用 `guard()` 驗證 HTTP 方法和 Token
+- 必須：使用 `validate()` 驗證參數
+- 必須：使用 `success()` 回傳結果
+- 禁止：包含業務邏輯
 
 **程式碼範本**：
 ```php
@@ -403,7 +430,7 @@ class XxxController extends BaseController
 完成開發後，更新對照表狀態：
 
 ```markdown
-| [x] | list() | `list()` | ✅ 已完成 | XxxController | 已完成並測試 |
+| [x] | list() | `list()` | 已完成 | XxxController | 已完成並測試 |
 ```
 
 ### 7. 輸出報告
@@ -437,6 +464,8 @@ curl -X POST "http://localhost/ADLAPI/v3/public/index.php?controller=Xxx&action=
 ## 品質檢查清單
 
 完成前確認：
+- [ ] DAO 繼承 BaseDao
+- [ ] DAO 不自行定義 __construct()（由 BaseDao 處理）
 - [ ] DAO 使用 Prepared Statements
 - [ ] DAO 讀寫分離（dbSlave/db）
 - [ ] Service 包含業務邏輯
@@ -445,7 +474,7 @@ curl -X POST "http://localhost/ADLAPI/v3/public/index.php?controller=Xxx&action=
 - [ ] Controller 繼承 BaseController
 - [ ] Controller 使用 guard() 和 validate()
 - [ ] Controller 不包含業務邏輯
-- [ ] 對照表已更新為 ✅
+- [ ] 對照表已更新狀態為「已完成」
 - [ ] 已告知用戶測試方式
 
 ## 參考資料

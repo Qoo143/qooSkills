@@ -18,17 +18,11 @@
 │   ├── api-review.md           # /api-review
 │   └── api-verify-mapping.md   # /api-verify-mapping
 └── skills/                      # 技能知識庫
-    ├── api-v3/                  # API-V3 架構規範
-    │   ├── skill.md
-    │   ├── routes.md
-    │   └── api-mapping/         # 對照表存放目錄
-    │       └── api-mapping-modules_student.md
-    └── database/                # 資料庫結構
+    └── api-v3/                  # API-V3 架構規範
         ├── skill.md
-        └── tables/
-            ├── user_info.md
-            ├── mission_info.md
-            └── ...
+        ├── routes.md
+        └── api-mapping/         # 對照表存放目錄
+            └── api-mapping-modules_student.md
 ```
 
 ## Agents vs Commands vs Skills
@@ -88,7 +82,8 @@ model: sonnet
 
 **現有 Skills**：
 1. `api-v3` - API-V3 架構規範、分層職責、開發範例
-2. `database` - 資料庫結構、資料表 schema
+
+> **資料庫查詢**：已改用 MCP MySQL Server（`.mcp.json`）直連資料庫，可即時查詢 schema 和資料，不再需要靜態 skill 文件。
 
 ## API-V3 開發工作流程
 
@@ -243,7 +238,7 @@ model: haiku  # 改為 haiku（快速、便宜）
 
 ### 更新 Skills
 
-直接編輯 `.claude/skills/api-v3/skill.md` 或 `.claude/skills/database/skill.md`
+直接編輯 `.claude/skills/api-v3/skill.md`
 
 ## 參考資料
 
@@ -252,8 +247,7 @@ model: haiku  # 改為 haiku（快速、便宜）
 - `CLAUDE.md` - 專案級指令（XSS 防護要求）
 
 ### 資料庫
-- `.claude/skills/database/skill.md` - 資料表清單
-- `.claude/skills/database/tables/` - 各資料表 schema
+- MCP MySQL Server（`.mcp.json`）- 即時查詢資料庫 schema 與資料
 
 ### 範例代碼
 - `ADLAPI/v3/App/Controller/` - 現有 Controller

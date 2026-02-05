@@ -1,15 +1,16 @@
 # API-V3 對照表 - modules_student.php
 
-**舊檔案路徑**：`modules/dashboard/modules_student.php`  
+**舊檔案路徑**：`modules/dashboard/modules_student.php`
 **相關檔案**：
 - `modules/assignMission/mission_action_general.php` (任務查詢核心邏輯)
 - `modules/srl/calender_todolist.php` (行事曆待辦事項)
 - `modules/srl/todolist.php` (待辦事項元件)
 - `modules/srl/prodb_calendar.php` (行事曆 AJAX 後端)
 
-**最後更新**：2026-02-02  
-**驗證狀態**：✅ 已驗證 (GAP 分析完成)  
+**最後更新**：2026-02-02
+**驗證狀態**：✅ 已驗證 (GAP 分析完成)
 **新版結構**：✅ Mission 模組已採用模組化設計
+**開發原則**：⚠️ 按照原本功能性，只轉換成 API，不做額外優化
 
 > **🆕 重要發現**：API v3 的 `Mission` 模組已採用新版資料夾結構設計，包含：
 > - `Processor/` - 策略模式處理不同任務類型
@@ -17,6 +18,35 @@
 > - `TaskCounter/` - 策略模式計算任務節點數
 > - 詳見：[完整驗證報告](file:///C:/Users/User/.gemini/antigravity/brain/3ebaabbe-16c5-4299-a985-bb5508223dcd/verification_report.md)
 
+> **⚠️ 外包任務類型**：以下任務類型由外包廠商負責，不在 API-V3 實作範圍：
+> - 類型 2 (學習問卷)
+> - 類型 7
+> - 類型 8 (學科素養)
+> - 類型 12
+> - 類型 17
+> - 類型 18
+> - 類型 19
+
+
+---
+
+## 參數對照表
+
+### 任務清單篩選參數
+
+| 舊參數名稱 | 新參數名稱 | 值對照 | 說明 |
+|-----------|-----------|--------|------|
+| `dowh_val` | `status` | `1` → `ongoing`<br>`2` → `expired`<br>`3` → `completed` | 任務狀態篩選 |
+| `sSelfPractice` | `self_practice` | `0` → `0` (老師指派)<br>`1` → `1` (自己指派)<br>`2` → `2` (家長/大學伴指派) | 指派來源篩選 |
+| `missionType` | `mission_type` | `all` → `all`<br>`{id}` → `{id}` | 任務類型篩選 |
+| `page` | `page` | 直接對應 | 分頁頁碼 |
+| - | `per_page` | 預設 `15` | 每頁筆數 (舊版固定 15) |
+
+### 任務詳情參數
+
+| 舊參數名稱 | 新參數名稱 | 說明 |
+|-----------|-----------|------|
+| `mission_sn` | `mission_sn` | 任務序號 (hash 格式) |
 
 ---
 
@@ -88,12 +118,21 @@
 | 小組長資料 | `mission_group_leader` JOIN | `mission_group_leader` JOIN + `group_ids`, `group_names` | ✅ |
 | 小組進度報告 | `assign_report.php` | `groupReport()` API | ✅ |
 
-### ❌ 缺失項目
+### ✅ 已完成項目（新增）
 
-| 特徵 | 舊檔案邏輯 | v3 API 實作 | 行動 |
-|------|-----------|-------------|------|
-| 個人設定 (卡片/列表) | `user_person_config.item_card_or_list` | ✅ 已實作 | `PersonalConfigController::get/update` |
-| 行事曆顯示設定 | `user_person_config.calendar` | ✅ 已實作 | `PersonalConfigController::get/update` |
+| 特徵 | 舊檔案邏輯 | v3 API 實作 | 實作位置 | 完成日期 |
+|------|-----------|-------------|---------|---------|
+| 自組班級任務篩選 | `teacher_class_member` (L95-111) | ✅ 已實作 | `MissionDao::getTeacherClassIds()` | 2026-02-02 |
+| 學習扶助班任務篩選 | `remedial_student` (L112-129) | ✅ 已實作 | `MissionDao::getRemedialClassIds()` | 2026-02-02 |
+| target_id 檢查邏輯 | `mission_action_general.php` L205-208 | ✅ 已實作 | `MissionDao::getMissionsByStatus()` L92-94 | 2026-02-02 |
+
+### 🏢 外包負責項目（不實作）
+
+| 特徵 | 舊檔案邏輯 | 說明 |
+|------|-----------|------|
+| 問卷連結查詢 | `QUESTIONNAIRE_Data()` (L95-111) | 任務類型 2 由外包負責 |
+| 素養任務節點 | `getLiteracySrc` | 任務類型 8 由外包負責 |
+| 其他外包任務 | 類型 7, 12, 17, 18, 19 | 由外包廠商處理 |
 
 ---
 
@@ -126,8 +165,49 @@
 
 ## 後續步驟
 
-1. ~~使用 `/api-write` workflow 建立 PersonalConfigController~~ ✅ 已完成
-2. ~~確認 AnnouncementController 資料來源~~ ⚠️ 標記為"待確認"
-3. 確認 QuestionnaireController 是否涵蓋舊版問卷連結功能 (L95-111)
-4. 檢查課程包任務進度同步邏輯 (L671-730 CURL) 是否已遷移
-5. 使用 `/api-review` workflow 進行 code review
+### 已完成
+- [x] 建立 PersonalConfigController (DAO/Service/Controller)
+- [x] GAP 分析驗證
+- [x] Code Review 完成
+- [x] 外包任務類型確認
+- [x] 實作自組班級任務篩選（2026-02-02）
+- [x] 實作學習扶助班任務篩選（2026-02-02）
+- [x] 補充 target_id 檢查邏輯（2026-02-02）
+
+### 不實作項目（外包負責）
+- [x] 問卷連結功能（類型 2）
+- [x] 素養任務節點（類型 8）
+- [x] 其他外包任務類型（7, 12, 17, 18, 19）
+
+---
+
+## 資料遷移檢查清單
+
+### 資料表完整性
+- [ ] `mission_info` - 確認所有任務資料完整
+- [ ] `mission_type` - 確認任務類型定義正確（排除外包類型）
+- [ ] `mission_stud_record` - 確認學生任務記錄完整
+- [ ] `mission_group_leader` - 確認小組長資料正確
+- [ ] `user_person_config` - 確認使用者設定初始值
+- [ ] `teacher_class_member` - 自組班級資料完整
+- [ ] `remedial_student` - 學習扶助班資料完整
+- [ ] `srl_calendar` - 行事曆待辦事項資料
+
+### 功能驗證
+- [ ] 一般任務顯示正常（類型 1, 3, 4, 5, 6 等）
+- [ ] 自組班級任務顯示正常（class_type = 1）
+- [ ] 學習扶助班任務顯示正常（class_type = 2）
+- [ ] 小組長功能運作正常
+- [ ] 任務詳情展開完整
+- [ ] 分頁功能正常
+- [ ] 任務狀態篩選正確（進行中/過期/已完成）
+- [ ] 指派來源篩選正確（老師/自己/家長）
+
+### 外包任務類型（不需遷移）
+- [x] 類型 2 (學習問卷) - 外包負責
+- [x] 類型 7 - 外包負責
+- [x] 類型 8 (學科素養) - 外包負責
+- [x] 類型 12 - 外包負責
+- [x] 類型 17 - 外包負責
+- [x] 類型 18 - 外包負責
+- [x] 類型 19 - 外包負責

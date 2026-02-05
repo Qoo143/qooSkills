@@ -45,21 +45,21 @@ model: sonnet
 
 **範例錯誤**：
 ```php
-// ❌ 錯誤：Controller 包含業務邏輯
+// [錯誤] 錯誤：Controller 包含業務邏輯
 public function list()
 {
     $userId = $this->request->getUserId();
 
-    // ❌ 不應該在 Controller 中判斷業務邏輯
+    // [錯誤] 不應該在 Controller 中判斷業務邏輯
     if ($userId < 0) {
         $this->error('用戶ID無效', 400);
     }
 
-    // ❌ 不應該直接操作資料庫
+    // [錯誤] 不應該直接操作資料庫
     $sql = "SELECT * FROM mission_info WHERE user_id = $userId";
 }
 
-// ✅ 正確：Controller 只負責接收參數、調用 Service
+// [正確] 正確：Controller 只負責接收參數、調用 Service
 public function list()
 {
     $this->guard(['method' => 'POST', 'token' => true]);
@@ -86,14 +86,14 @@ public function list()
 
 **Read-before-Write 檢查**：
 ```php
-// ❌ 錯誤：Update 沒有先 Read
+// [錯誤] 錯誤：Update 沒有先 Read
 public function update($userId, $id, $params)
 {
     $data = ['title' => $params['title']];
     $this->dao->update($userId, $id, $data);  // 沒檢查是否存在
 }
 
-// ✅ 正確：Read-before-Write
+// [正確] 正確：Read-before-Write
 public function update($userId, $id, $params)
 {
     // 1. Read
@@ -133,23 +133,23 @@ public function update($userId, $id, $params)
 
 **範例錯誤**：
 ```php
-// ❌ 錯誤：字串拼接，有 SQL 注入風險
+// [錯誤] 錯誤：字串拼接，有 SQL 注入風險
 public function getById($userId, $id)
 {
     $sql = "SELECT * FROM mission_info WHERE user_id = $userId AND id = $id";
     return $this->dbSlave->query($sql)->fetch();
 }
 
-// ❌ 錯誤：包含業務邏輯
+// [錯誤] 錯誤：包含業務邏輯
 public function create($data)
 {
-    if (empty($data['title'])) {  // ❌ 業務驗證應在 Service
+    if (empty($data['title'])) {  // [錯誤] 業務驗證應在 Service
         throw new AppException('標題不能為空', 400);
     }
     // ...
 }
 
-// ✅ 正確：使用 Prepared Statements
+// [正確] 正確：使用 Prepared Statements
 public function getById($userId, $id)
 {
     $sql = "SELECT * FROM mission_info
@@ -188,11 +188,11 @@ grep -n "WHERE.*\$" ADLAPI/v3/App/Dao/*.php
 
 **檢查輸出**：
 ```php
-// ❌ 錯誤：直接 echo 用戶輸入
+// [錯誤] 錯誤：直接 echo 用戶輸入
 echo $userInput;
 echo json_encode(['name' => $userData['name']]);
 
-// ✅ 正確：API 統一使用 JSON 回傳，由 Response 類處理
+// [正確] 正確：API 統一使用 JSON 回傳，由 Response 類處理
 $this->success(['name' => $userData['name']]);
 ```
 
@@ -200,10 +200,10 @@ $this->success(['name' => $userData['name']]);
 
 **確認每個 API 都有權限驗證**：
 ```php
-// ✅ Controller 必須有
+// [正確] Controller 必須有
 $this->guard(['method' => 'POST', 'token' => true]);
 
-// ✅ Service 應檢查資料擁有權
+// [正確] Service 應檢查資料擁有權
 if ($data['user_id'] != $userId) {
     throw new AppException('無權限存取', 403);
 }
@@ -220,26 +220,26 @@ if ($data['user_id'] != $userId) {
 
 **Controller**：
 ```php
-// ❌ 錯誤：Controller 不應該 try-catch
+// [錯誤] 錯誤：Controller 不應該 try-catch
 try {
     $result = $this->service->getList($userId);
 } catch (Exception $e) {
     $this->error($e->getMessage(), 500);
 }
 
-// ✅ 正確：讓異常自動冒泡，由 ErrorHandlerMiddleware 處理
+// [正確] 正確：讓異常自動冒泡，由 ErrorHandlerMiddleware 處理
 $result = $this->service->getList($userId);
 $this->success($result);
 ```
 
 **Service**：
 ```php
-// ✅ 正確：使用 AppException
+// [正確] 正確：使用 AppException
 if (!$existing) {
     throw new AppException('資料不存在', 404);
 }
 
-// ❌ 錯誤：捕捉 PDOException
+// [錯誤] 錯誤：捕捉 PDOException
 try {
     $this->dao->create($data);
 } catch (PDOException $e) {
@@ -249,7 +249,7 @@ try {
 
 **DAO**：
 ```php
-// ✅ 正確：不處理異常，讓 PDOException 冒泡
+// [正確] 正確：不處理異常，讓 PDOException 冒泡
 public function create($data)
 {
     $stmt = $this->db->prepare($sql);
@@ -292,7 +292,7 @@ public function create($data)
 
 ---
 
-## 🔴 CRITICAL（必須修正）
+## CRITICAL（必須修正）
 
 ### 1. SQL 注入風險 (XxxDao.php:45)
 
@@ -309,7 +309,7 @@ $stmt->bindValue(':id', $id, \PDO::PARAM_INT);
 
 ---
 
-## 🟡 WARNING（應該修正）
+## WARNING（應該修正）
 
 ### 1. Service 層缺少 Read-before-Write (XxxService.php:78)
 
@@ -326,7 +326,7 @@ public function update($userId, $id, $params)
 
 ---
 
-## 🔵 SUGGESTION（建議改進）
+## SUGGESTION（建議改進）
 
 ### 1. 方法可以提取為 Helper
 
@@ -337,7 +337,7 @@ public function update($userId, $id, $params)
 
 ---
 
-## ✅ 通過檢查
+## 通過檢查
 
 - [x] Controller 使用 guard() 和 validate()
 - [x] DAO 使用 Prepared Statements

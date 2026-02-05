@@ -1,7 +1,7 @@
 ---
 name: api-mapping-table
 description: 分析舊 PHP 檔案並建立 API-V3 遷移對照表。深度分析業務邏輯、SQL 查詢、參數驗證，規劃 Controller 方法對應。
-tools: Read, Grep, Glob, Bash
+tools: Read, Write, Grep, Glob, Bash
 model: sonnet
 ---
 
@@ -85,9 +85,9 @@ model: sonnet
 
 | 選擇 | 舊端點 | Controller 方法 | 狀態 | Controller | 說明 |
 |:----:|--------|----------------|:----:|-----------|------|
-| [ ] | Page Load: Get Mission List | `list()` | ⏳ 待處理 | TodoController（現有） | 學生任務清單 |
-| [ ] | Action: getDetail | `detail()` | ⏳ 待處理 | TodoController（現有） | 任務詳情 |
-| [ ] | Action: updateStatus | `updateStatus()` | ⏳ 待處理 | TodoController（現有） | 更新狀態 |
+| [ ] | Page Load: Get Mission List | `list()` | 待處理 | TodoController（現有） | 學生任務清單 |
+| [ ] | Action: getDetail | `detail()` | 待處理 | TodoController（現有） | 任務詳情 |
+| [ ] | Action: updateStatus | `updateStatus()` | 待處理 | TodoController（現有） | 更新狀態 |
 
 ---
 
