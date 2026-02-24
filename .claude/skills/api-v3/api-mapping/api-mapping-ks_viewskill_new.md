@@ -48,14 +48,27 @@
 
 | 選擇 | 舊端點/功能 | Controller 方法 | 狀態 | Controller | 說明 |
 |:----:|--------|----------------|:----:|-----------|------|
-| [ ] | Page Load: 課程節點詳情 | `detail()` | 待處理 | **LearningResourceController（新建）** | 課程節點的完整資訊與資源清單 |
-| [ ] | Function: 取得節點基本資訊 | `getNodeInfo()` | 待處理 | LearningResourceController（新建） | 科目、年級、出版商、單元名稱 |
-| [ ] | Function: 取得上下位節點 | `getRelatedNodes()` | 待處理 | LearningResourceController（新建） | 向上學習、向下補救的節點清單 |
-| [ ] | Function: 檢查資源類型 | `checkResourceTypes()` | 待處理 | LearningResourceController（新建） | 檢查該節點擁有的學習資源 |
-| [ ] | Function: 取得影片資訊 | `getVideoList()` | 待處理 | LearningResourceController（新建） | 該節點的教學影片清單 |
-| [ ] | Function: 取得補充教材 | `getSupplementaryMaterials()` | 待處理 | LearningResourceController（新建） | 檔案型補充教材 |
-| [ ] | Function: 取得外部連結 | `getExternalLinks()` | 待處理 | LearningResourceController（新建） | 連結型補充教材 |
-| [ ] | Function: 取得 eGame 連結 | `getEGameLink()` | 待處理 | LearningResourceController（新建） | 小試身手遊戲連結 |
+| [x] | Page Load: 課程節點詳情 | `node()` | ✅ 已完成 | **KnowledgeController** | 課程節點的完整資訊與資源清單 |
+| [x] | Function: 取得上下位節點 | `relatedNodes()` | ✅ 已完成 | KnowledgeController | 向上學習、向下補救的節點清單 |
+| [x] | SubModule: 影片播放 | `video()` | ✅ 已完成 | **KsLearningController** | video() + videoRecord() |
+| [x] | SubModule: 練習題 | `practice()` | ✅ 已完成 | KsLearningController | practice() + practiceSubmit() |
+| [x] | SubModule: 動態評量 | `assessment()` | ✅ 已完成 | KsLearningController | assessment() + assessmentSubmit() |
+| [x] | Function: 取得補充教材 | - | ⚠️ 整合 | KnowledgeController | 整合於 node() 回傳的 files 欄位 |
+| [x] | Function: 取得外部連結 | - | ⚠️ 整合 | KnowledgeController | 整合於 node() 回傳的 external_links 欄位 |
+| [x] | Function: 取得 eGame 連結 | - | ⚠️ 整合 | KnowledgeController | 整合於 node() 回傳的 resources.e_game_url |
+
+### API 端點路徑
+
+| HTTP Method | 端點路徑 | Controller 方法 | 說明 |
+|-------------|----------|----------------|------|
+| POST | `/api/v3/knowledge/node` | KnowledgeController::node() | 節點詳情 |
+| POST | `/api/v3/knowledge/related-nodes` | KnowledgeController::relatedNodes() | 上下位節點 |
+| POST | `/api/v3/ks-learning/video` | KsLearningController::video() | 開始觀看影片 |
+| POST | `/api/v3/ks-learning/video/record` | KsLearningController::videoRecord() | 更新影片進度 |
+| POST | `/api/v3/ks-learning/practice` | KsLearningController::practice() | 取得練習題 |
+| POST | `/api/v3/ks-learning/practice-submit` | KsLearningController::practiceSubmit() | 提交練習題 |
+| POST | `/api/v3/ks-learning/assessment` | KsLearningController::assessment() | 取得動態評量 |
+| POST | `/api/v3/ks-learning/assessment-submit` | KsLearningController::assessmentSubmit() | 提交動態評量 |
 
 ---
 
@@ -74,31 +87,44 @@
 
 **參數分析**：
 ```php
-// GET 參數
-$indicator = $_REQUEST['ind'];              // 知識點代碼（必填）
-$mapping_sn = $_REQUEST['mid'];             // 課程對應序號（選填）
-$map_sn = $_REQUEST['map_sn'];             // 地圖序號（選填）
-$subject_id = $_REQUEST['subject_id'];     // 科目ID（選填）
-$interactiveid = $_REQUEST['interactiveid']; // 互動題ID（選填，物理模擬題專用）
-$mission_sn = $_REQUEST['mission_sn'];     // 任務序號（選填）
+// ⭐ 支援兩種模式，擇一使用
 
-// 參數判斷邏輯
-// Case 1: 使用 mapping_sn（一般課程）
-//   從 publisher_mapping 查詢 subject_id, map_sn
-// Case 2: 使用 interactiveid（物理模擬題）
-//   從 concept_itemBank_literacy_interactive 查詢資訊
+// Mode 1: 一般課程（使用 mapping_sn）
+$mapping_sn = $_REQUEST['mid'];             // publisher_mapping.mapping_sn
+
+// Mode 2: 物理模擬題（使用 interactiveid + subject_id）
+$interactiveid = $_REQUEST['interactiveid']; // concept_itemBank_literacy_interactive.item_li_sn
+$subject_id = $_REQUEST['subject_id'];       // 科目 ID（Mode 2 必填）
+
+// 通用參數（選填）
+$mission_sn = $_REQUEST['mission_sn'];       // 任務序號，存入 Session 供子模組使用
 ```
+
+**參數邏輯說明**：
+- **Mode 1**: 透過 `mapping_sn` 從 `publisher_mapping` 查詢 indicator、subject_id
+- **Mode 2**: 透過 `interactiveid` 從 `concept_itemBank_literacy_interactive` 查詢 indicator，搭配 `subject_id` 取得課程資訊
 
 **對應 Validator 規則**：
 ```php
 [
-    'indicator' => 'required|string|max:50',
+    // Mode 1 參數
     'mapping_sn' => 'integer|exists:publisher_mapping,mapping_sn',
-    'map_sn' => 'integer',
-    'subject_id' => 'integer|exists:subject,subject_id',
+
+    // Mode 2 參數
     'interactiveid' => 'integer|exists:concept_itemBank_literacy_interactive,item_li_sn',
+    'subject_id' => 'integer|exists:subject,subject_id',
+
+    // 通用參數
     'mission_sn' => 'integer|exists:mission_info,mission_sn',
 ]
+
+// ⭐ 自訂驗證：至少提供一種模式
+// if (empty($mapping_sn) && empty($interactiveid)) {
+//     throw new AppException('必須提供 mapping_sn 或 interactiveid', 400);
+// }
+// if (!empty($interactiveid) && empty($subject_id)) {
+//     throw new AppException('使用 interactiveid 時必須提供 subject_id', 400);
+// }
 ```
 
 **SQL 查詢總覽**：

@@ -1,12 +1,24 @@
 # API-V3 對照表：Knowledge (知識結構)
 
+## 遷移進度總覽
+
+| 端點 | 狀態 | 待處理項目 |
+|------|------|-----------|
+| POST /knowledge/node | ✅ 90% | Robot 白名單、eGame URL |
+| POST /knowledge/unit | ✅ 100% | - |
+| POST /knowledge/list | ✅ 100% | - |
+| POST /knowledge/related-nodes | ✅ 100% | - |
+
+---
+
 ## 舊檔案
 
-| 檔案 | 用途 |
-|------|------|
-| `modules/assignMission/ks_viewskill_newScrept.php` | 節點詳情頁邏輯 (PHP+JS 混合) |
-| `modules/assignMission/ks_viewskill_new.php` | 節點詳情頁 HTML 模板 |
-| `modules/assignMission/assign_mission.php` | 包含出版商/單元列表查詢 |
+| 檔案 | 用途 | 對應新端點 |
+|------|------|-----------|
+| `modules/assignMission/ks_viewskill_newScrept.php` | 節點詳情頁邏輯 (PHP+JS 混合) | node(), relatedNodes() |
+| `modules/assignMission/ks_viewskill_new.php` | 節點詳情頁 HTML 模板 | node() |
+| `modules/assignMission/ks_viewunit_new.php` | 單元節點列表頁 | unit() |
+| `modules/assignMission/assign_mission.php` | 出版商/單元列表查詢 | list() |
 
 ## 現有 V3 檔案
 
@@ -63,10 +75,10 @@
 
 **差異說明**:
 
-1. **物理模擬題影片連動** ⚠️:
+1. **物理模擬題影片連動** ✅:
    - 舊系統: `if ($sub_info['interactive'] == 1 && $sub_info['videolist'] > 0) { $sub_info['video'] = 1; }`
-   - 新系統: 無此邏輯
-   - **影響**: 有物理模擬題且有影片時，舊系統會強制開啟 video tab
+   - 新系統: `ResourceDao::getResourceFlags()` 第 59-62 行已實作相同邏輯
+   - **狀態**: 已完整遷移
 
 2. **Robot (AI 學習夥伴) 判斷** ⚠️:
    - 舊系統: 使用 `robotConfig('subject_open.map_sn')` 取得 map_sn 白名單 + 排除社會科(209) + 排除高中英語(subject_id=30, grade 10-12)
@@ -161,7 +173,7 @@
 
 ## 特殊邏輯清單
 
-1. **物理模擬題影片連動**: `interactive == 1 && videolist > 0` 時強制 `video = 1` (新系統缺失)
+1. **物理模擬題影片連動**: `interactive == 1 && videolist > 0` 時強制 `video = 1` ✅ 已實作
 2. **Robot map_sn 白名單**: 舊系統使用 `robotConfig('subject_open.map_sn')` 動態取得，新系統無此機制
 3. **Robot 高中英語排除**: 舊系統有 `subject_id = 30 AND grade BETWEEN 10 AND 12` 排除邏輯
 4. **eGame URL 加工**: 舊系統使用 `createAPIDataURL()` 處理
@@ -173,7 +185,22 @@
 
 ## 總結
 
-Knowledge Controller 是 6 個 controller 中**實作最完整**的。4 個端點全部 POST，核心業務邏輯遷移正確。主要需補強：
-1. Robot AI 學習夥伴的 map_sn 白名單和高中英語排除
-2. 物理模擬題影片連動邏輯
-3. 檔案下載路徑改用 API 端點
+Knowledge Controller 是 6 個 controller 中**實作最完整**的。4 個端點全部 POST，核心業務邏輯遷移正確。
+
+### 待補強項目 (依優先級排序)
+
+| 優先級 | 項目 | 影響範圍 | 建議做法 |
+|--------|------|----------|----------|
+| 🔴 高 | Robot map_sn 白名單 | 可能在未開放科目顯示 Robot | 讀取 `robotConfig()` 或建立設定檔 |
+| 🔴 高 | Robot 高中英語排除 | 高中英語(10-12年級) 錯誤顯示 | 加入 grade + subject_id 判斷 |
+| 🟡 中 | eGame URL 加工 | 前端需額外處理 | 統一使用 `createAPIDataURL()` |
+| 🟢 低 | 檔案下載路徑 | 路徑直接暴露 | 改用 API 端點代理下載 |
+| 🟢 低 | interactiveid 入口 | 物理模擬題直接連結失效 | 視需求增加參數 |
+
+### 已完成項目
+
+- ✅ 4 個端點完整實作 (node, unit, list, related-nodes)
+- ✅ 物理模擬題影片連動邏輯
+- ✅ 高中數學分流出版商
+- ✅ 權限過濾移至後端
+- ✅ 無狀態設計 (不依賴 session)

@@ -72,6 +72,7 @@ Helper 使用原則：Controller 和 Service 都可使用 Helper，但 Helper �
 <?php
 namespace App\Controller;
 
+use App\Dao\XxxDao;
 use App\Service\XxxService;
 
 class XxxController extends BaseController
@@ -81,7 +82,8 @@ class XxxController extends BaseController
     public function __construct($request, $response)
     {
         parent::__construct($request, $response);
-        $this->xxxService = new XxxService();
+        // 強制注入：Controller 負責組裝依賴鏈
+        $this->xxxService = new XxxService(new XxxDao());
     }
 
     public function query()
@@ -109,9 +111,10 @@ class XxxService
 {
     private $xxxDao;
 
-    public function __construct()
+    // 強制注入：依賴必須由外部提供
+    public function __construct(XxxDao $xxxDao)
     {
-        $this->xxxDao = new XxxDao();
+        $this->xxxDao = $xxxDao;
     }
 
     public function getById($userId, $id)
@@ -224,9 +227,10 @@ class AnnouncementService
 {
     private $userDao;
 
-    public function __construct()
+    // 強制注入：依賴必須由外部提供
+    public function __construct(UserDao $userDao)
     {
-        $this->userDao = new UserDao();
+        $this->userDao = $userDao;
     }
 
     private function getUserIdentity($userId)
