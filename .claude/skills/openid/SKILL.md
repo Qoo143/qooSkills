@@ -1,8 +1,6 @@
 ---
 name: openid
-description: >
-  OpenID 模組技術參考。當詢問 OpenID 登入流程、帳號查詢、資料同步、
-  Log 記錄、快速登入、帳號創建、身分認證 相關問題時觸發。
+description:  OpenID 模組技術參考。當詢問 OpenID 登入流程、帳號查詢、資料同步、Log 記錄、快速登入、帳號創建、身分認證 相關問題時觸發。
 ---
 
 # OpenID 模組

@@ -1,119 +1,120 @@
 ---
-name: FlightPHP 最佳化開發指南
-description: 基於 flightphp/core 原始碼的 API 參考與最佳化開發指南，確保 AI 產出高品質 FlightPHP 程式碼
+name: api-v4
+description: API v4 開發工作流與 Agent 指揮中心。當需要分析舊檔案、撰寫 v4 端點、審閱 v4 程式碼時觸發。
 ---
 
-# FlightPHP 最佳化開發指南
+# API v4 開發工作流
 
-> **目標讀者**：AI 編碼助手。此 Skill 提供基於原始碼的精確 API 用法，避免生成不存在的 API 或錯誤的呼叫方式。
+> 此 Skill 管理 v4 API 的開發流程：從分析舊檔案到產出可用的 FlightPHP 端點。
+> 框架 API 細節請參考 `flightphp` skill。
 
-## 必讀：6 條鐵律
+## 專案概況
 
-在撰寫任何 FlightPHP 程式碼前，務必確認：
+**目標**：將 `modules/*/prodb_*.php` 舊功能遷移為 FlightPHP RESTful API。
 
-1. **靜態 vs 實例**: `Flight::xxx()` 是靜態呼叫、`$this->app->xxx()` 是 Engine 實例呼叫，兩者方法完全相同
-2. **中間件必須有 `before()` 方法**：Flight 用 `method_exists($middleware, 'before')` 檢查
-3. **回應不自動中止**：`Flight::json()` 不會停止執行，要停止必須用 `Flight::jsonHalt()` 或手動 `return`
-4. **Controller 建構子自動注入 Engine**：無需手動實例化
-5. **資料庫請用 `SimplePdo`**：`PdoWrapper` 已 deprecated
-6. **路由參數用 `@` 前綴**：`@id`、`@name` 等，不是 `{id}`
+**技術棧**：
+- 框架：FlightPHP（`ADLAPI/v4/libs/core/`）
+- 架構：Controller → Service → Repository（三層分離）
+- 認證：AuthMiddleware（Session-based）
+- 資料庫：`Flight::db()`（寫入）/ `Flight::dbSlave()`（讀取）
 
----
+**已完成端點**（routes.php）：
+- `/health` - 健康檢查
+- `/mission-types` - 任務類型
+- `/student/missions` - 學生任務卡
+- `/parent/children` - 家長子女列表
+- `/calendar/*` - 行事曆 CRUD
+- `/user/config` - 使用者設定
 
-## 框架核心架構
-
-### 類別總覽
-
-```
-flight/
-├── Engine.php           # 核心引擎 (所有功能的中心)
-├── Flight.php           # 靜態代理 (透過 __callStatic 轉發到 Engine)
-├── autoload.php         # 自動載入器
-├── core/
-│   ├── Dispatcher.php   # 事件分派器 (before/after hook, DI container)
-│   ├── EventDispatcher.php  # 事件系統 (on/trigger，Singleton)
-│   └── Loader.php       # 類別載入器
-├── database/
-│   ├── SimplePdo.php    # ✅ 新版資料庫封裝 (推薦使用)
-│   └── PdoWrapper.php   # ❌ 已 deprecated
-├── net/
-│   ├── Request.php      # HTTP 請求封裝
-│   ├── Response.php     # HTTP 回應封裝
-│   ├── Route.php        # 單一路由物件
-│   ├── Router.php       # 路由器
-│   └── UploadedFile.php # 上傳檔案
-├── template/
-│   └── View.php         # 模板引擎
-└── util/
-    ├── Collection.php   # 集合（支援陣列/物件雙存取）
-    └── Json.php         # JSON 編碼/解碼工具
-```
-
-### 請求生命週期
+## 核心檔案路徑
 
 ```
-index.php
-  → require Flight.php
-  → require bootstrap.php   (設定、註冊元件)
-  → require routes.php      (定義路由)
-  → Flight::start()
-      → Engine::_start()
-          → before('start') filter 執行
-          → Router::route(Request) 匹配路由
-          → 執行 before middleware
-          → 執行路由 callback / Controller 方法
-          → 執行 after middleware
-          → Response::send()
+ADLAPI/v4/
+├── public/index.php              # 入口
+├── config/
+│   ├── bootstrap.php             # 初始化（DB、CORS、Helper）
+│   └── routes.php                # 路由定義
+└── src/App/
+    ├── Controller/               # HTTP 層（薄）
+    ├── Service/                  # 業務邏輯
+    ├── Repository/               # SQL 查詢
+    └── Middleware/                # 認證、參數驗證
 ```
 
 ---
 
-## 詳細指南目錄
+## 三步工作流
 
-遇到特定主題時，請讀取對應的 guide 文件以取得完整參考：
+```
+舊 PHP 檔案 (modules/*/prodb_*.php)
+    │
+    ▼
+┌─────────────────────────────────┐
+│  Step 1: /api-v4-analyze        │
+│  分析舊檔案 → 端點對照表        │
+│  輸出: 端點規劃、參數、SQL 位置  │
+└─────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────┐
+│  Step 2: /api-v4-write          │
+│  逐一實作端點                    │
+│  順序: Repository → Service      │
+│       → Controller → routes.php │
+└─────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────┐
+│  Step 3: /api-v4-review         │
+│  程式碼審閱                      │
+│  檢查: 分層、安全、一致性       │
+└─────────────────────────────────┘
+```
 
-### 核心 API
+### 何時使用哪個 Agent
 
-| 指南 | 檔案 | 涵蓋內容 |
-|------|------|----------|
-| 路由系統 | `guides/routing.md` | 基本路由、參數、群組、別名、RESTful Resource、串流 |
-| Controller | `guides/controller.md` | 基本結構、請求資料取得、服務注入模式 |
-| 回應系統 | `guides/response.md` | json/jsonHalt/halt、重導向、下載、HTTP 快取 |
-| 中間件 | `guides/middleware.md` | 結構、執行順序、常見使用情境（Auth、API Key、角色） |
-| 資料庫 | `guides/database.md` | SimplePdo 方法、本專案 PDO 模式、交易、IN 查詢 |
-| 框架擴充 | `guides/extending.md` | map/register、set/get、before/after filter、事件系統 |
+| 情境 | Agent |
+|------|-------|
+| 拿到一個舊 prodb 檔案，要規劃怎麼遷移 | `/api-v4-analyze` |
+| 已有規劃，要開始寫程式碼 | `/api-v4-write` |
+| 程式碼寫好了，要檢查品質 | `/api-v4-review` |
+| 想了解 FlightPHP 框架用法 | 參考 `flightphp` skill |
 
-### 進階主題
+---
 
-| 指南 | 檔案 | 涵蓋內容 |
-|------|------|----------|
-| 專案架構 | `guides/project-architecture.md` | 目錄結構、三層架構、回應格式、範例模板、命名規範 |
-| 依賴注入 | `guides/dependency-injection.md` | DIC 概念、本專案 DI 模式、進階 Dice/PHP-DI |
-| 單元測試 | `guides/unit-testing.md` | PHPUnit 設定、Controller 測試、Mock、避免過度 Mock |
+## 開發鐵律
 
-### 速查與檢查
+1. **一次一個端點** — 逐一討論、逐一實作、逐一驗證
+2. **SQL 標位置不複製** — 只標註舊檔案行號，由用戶確認後貼入
+3. **資料庫連線用現有的** — `Flight::db()` / `Flight::dbSlave()`，不建新連線
+4. **Session 已可用** — `index.php` 已 require `config.php`，`$_SESSION` 直接使用
+5. **三層職責嚴格分離** — Controller 不寫 SQL、Repository 不處理 HTTP、Service 不碰 request/response
 
-| 指南 | 檔案 | 用途 |
+## 命名規範
+
+| 項目 | 規範 | 範例 |
 |------|------|------|
-| API 速查卡 | `guides/cheatsheet.md` | 所有方法簽名速查 |
-| 反模式檢查 | `guides/anti-patterns.md` | 產出程式碼前的自我檢查清單 |
-| 開發工作流 | `guides/dev-workflow.md` | 端點分析、逐步實作流程、命名規範 |
+| Controller | PascalCase + Controller | `CalendarController` |
+| Service | PascalCase + Service | `CalendarService` |
+| Repository | PascalCase + Repository | `CalendarRepository` |
+| 路由 | kebab-case, RESTful | `GET /calendar/events` |
+| 方法名 | camelCase | `getEventsByDateRange` |
+| 檔案位置 | 對應 namespace | `src/App/Controller/CalendarController.php` |
 
----
-
-## 快速範例：標準 CRUD 端點
+## 回應格式
 
 ```php
-// routes.php
-Flight::group('/api/v4', function () {
-    Flight::group('/examples', function () {
-        Flight::get('', [ExampleController::class, 'index']);
-        Flight::get('/@id', [ExampleController::class, 'show']);
-        Flight::post('', [ExampleController::class, 'create']);
-        Flight::put('/@id', [ExampleController::class, 'update']);
-        Flight::delete('/@id', [ExampleController::class, 'destroy']);
-    }, [AuthMiddleware::class]);
-});
-```
+// 成功
+Flight::success($data);           // {"success":true,"data":{...}}
+Flight::success($data, 201);      // 新增成功
 
-> 完整的 Controller/Service/Repository 模板請參見 `guides/project-architecture.md`。
+// 分頁
+Flight::success(['items'=>$rows, 'meta'=>$meta]);
+// {"success":true,"data":[...],"meta":{...}}
+
+// 失敗
+Flight::fail('錯誤訊息', 400);    // {"success":false,"error":{"code":400,"message":"..."}}
+
+// 例外（Service 層拋出，bootstrap 全域攔截）
+throw new \Exception('資料不存在', 404);
+```
